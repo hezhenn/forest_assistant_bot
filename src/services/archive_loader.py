@@ -17,7 +17,7 @@ async def load_initial_archive(archive_path: Path, db: Database, groq_service: G
     if not archive_path.exists():
         return 0
 
-    # Читаємо кеш для відсканованих PDF 
+    # Читаємо кеш для відсканованих PDF
     ocr_cache_path = Path(__file__).parent / "ocr_cache.json"
     ocr_data = {}
     if ocr_cache_path.exists():

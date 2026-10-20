@@ -1,3 +1,4 @@
+import unicodedata
 from enum import Enum
 from typing import List, Dict, Optional, Tuple
 
@@ -41,11 +42,8 @@ MITTEN_TO_ZONES: Dict[str, List[str]] = {
     "На узліссі": [],  # Не належить до жодної з трьох зон
 }
 def normalize_location_name(name: str) -> Optional[Tuple[ScopeType, str]]:
-    """
-    Нормалізує введену або знайдену назву локації.
-    Повертає кортеж (ScopeType, канонічна_назва) або None, якщо не розпізнано.
-    """
-    cleaned = name.strip().lower()
+    
+    cleaned = unicodedata.normalize("NFC", name).strip().lower()
     # 1. Перевірка на "весь ліс"
     if cleaned in ["весь ліс", "ліс", "загальний", "all", "all_forest", "для всього лісу"]:
         return (ScopeType.ALL_FOREST, "весь ліс")
@@ -96,16 +94,7 @@ def normalize_location_name(name: str) -> Optional[Tuple[ScopeType, str]]:
         return (ScopeType.ZONE, "біля річки")
     return None
 def get_applicable_scopes_for_target(scope_type: ScopeType, target_name: str) -> List[Tuple[ScopeType, str, int]]:
-    """
-    Повертає список областей (scopes), які діють для цілі пошуку, 
-    відсортований за спаданням специфічності (пріоритету).
-    Кортеж: (scope_type, scope_name, priority_weight)
-    
-    Ієрархія вагів:
-    - Рукавичка (MITTEN): 30
-    - Зона (ZONE): 20
-    - Весь ліс (ALL_FOREST): 10
-    """
+
     results: List[Tuple[ScopeType, str, int]] = []
     if scope_type == ScopeType.MITTEN:
         # 1. Специфічне правило конкретної рукавички

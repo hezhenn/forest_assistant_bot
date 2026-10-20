@@ -1,3 +1,6 @@
+import html
+import re
+
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
@@ -6,6 +9,12 @@ from src.services.groq_service import GroqService
 from src.services.search_service import SearchService
 from src.bot.keyboards import get_locations_keyboard
 from src.domain.forest_rules import ScopeType
+
+def format_to_html(text: str) -> str:
+    safe = html.escape(text)
+    safe = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', safe)
+    safe = re.sub(r'(?m)^[\*\-]\s+', '• ', safe)
+    return safe
 
 router = Router(name="questions_router")
 
@@ -52,7 +61,7 @@ async def handle_user_question(
         documents=docs
     )
 
-    await message.answer(answer)
+    await message.answer(format_to_html(answer))
 
 
 @router.callback_query(F.data.startswith("loc:"))
@@ -77,7 +86,7 @@ async def handle_location_choice_for_query(
     await state.clear()
 
     await callback.answer(f"Обрано: {location}")
-    await callback.message.edit_text(f"🔍 Шукаю пораду для: **{location}**...", parse_mode="Markdown")
+    await callback.message.edit_text(f"🔍 Шукаю пораду для: <b>{html.escape(location)}</b>...")
     await callback.message.bot.send_chat_action(chat_id=callback.message.chat.id, action="typing")
 
     # Шукаємо документи для обраної локації
@@ -93,4 +102,4 @@ async def handle_location_choice_for_query(
         documents=docs
     )
 
-    await callback.message.edit_text(answer)
+    await callback.message.edit_text(format_to_html(answer))

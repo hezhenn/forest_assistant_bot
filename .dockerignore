@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.git/
+.gitignore
+.idea/
+.vscode/
+.DS_Store
+data/
+*.sqlite3
+*.db
+.env
